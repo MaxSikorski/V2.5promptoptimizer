@@ -481,10 +481,23 @@ Example: 'Write a professional email to my boss requesting a raise'"></textarea>
         <div class="tooltip-content" id="tooltip-content"></div>
     </div>
 
-    <!-- Scripts -->
-    <script src="analyzer.js"></script>
-    <script src="optimizer.js"></script>
-    <script src="models.js"></script>
-    <script src="app.js"></script>
+    <!-- Scripts - LOAD IN THIS ORDER -->
+    <!-- Debug tools (optional but recommended for troubleshooting) -->
+    <script src="debug.js" onerror="console.warn('debug.js not found - optional file')"></script>
+    
+    <!-- Core dependencies FIRST - These define global objects -->
+    <script src="models.js" onerror="alert('CRITICAL: Failed to load models.js. Check file location.')"></script>
+    <script src="analyzer.js" onerror="alert('CRITICAL: Failed to load analyzer.js. Check file location.')"></script>
+    <script src="optimizer.js" onerror="alert('CRITICAL: Failed to load optimizer.js. Check file location.')"></script>
+    
+    <!-- Main application LAST - Depends on above files -->
+    <script src="app.js" onerror="alert('CRITICAL: Failed to load app.js. Check file location.')"></script>
+    
+    <!-- Verification script -->
+    <script>
+        // This runs AFTER all scripts are loaded
+        console.log('%c✓ All scripts loaded', 'color: green; font-weight: bold');
+        console.log('Page ready. Type in the prompt textarea to test.');
+    </script>
 </body>
 </html>
