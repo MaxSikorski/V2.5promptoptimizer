@@ -3,7 +3,36 @@
  * Handles UI state, user interactions, and orchestrates analysis/optimization
  */
 
+// CRITICAL: Check dependencies before starting
+(function checkDependencies() {
+    const required = {
+        'PromptAnalyzer': window.PromptAnalyzer,
+        'PromptOptimizer': window.PromptOptimizer,
+        'ModelData': window.ModelData,
+        'TooltipContent': window.TooltipContent
+    };
+    
+    const missing = [];
+    for (const [name, value] of Object.entries(required)) {
+        if (typeof value === 'undefined') {
+            missing.push(name);
+            console.error(`❌ ${name} not loaded`);
+        } else {
+            console.log(`✓ ${name} loaded`);
+        }
+    }
+    
+    if (missing.length > 0) {
+        console.error('CRITICAL: Missing dependencies:', missing);
+        alert(`Error: Failed to load required scripts:\n${missing.join(', ')}\n\nPlease check that all .js files are in the correct location.`);
+        throw new Error(`Missing dependencies: ${missing.join(', ')}`);
+    }
+    
+    console.log('✓ All dependencies loaded successfully');
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Starting Prompt Optimizer V2...');
     // Application State
     const state = {
         currentStep: 1,
@@ -97,10 +126,67 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 
     function init() {
-        setupEventListeners();
-        loadTheme();
-        updateStepDisplay();
-        lucide.createIcons();
+        console.log('📝 Initializing application...');
+        
+        // Verify critical elements
+        const criticalElements = {
+            promptInput: promptInput,
+            modelCards: modelCards,
+            nextBtn: nextBtn,
+            backBtn: backBtn,
+            scoreValue: scoreValue
+        };
+        
+        let missingElements = [];
+        for (const [name, element] of Object.entries(criticalElements)) {
+            if (!element || (element.length !== undefined && element.length === 0)) {
+                missingElements.push(name);
+                console.error(`❌ Critical element missing: ${name}`);
+            } else {
+                console.log(`✓ Found: ${name}`);
+            }
+        }
+        
+        if (missingElements.length > 0) {
+            console.error('CRITICAL: Missing DOM elements:', missingElements);
+            alert(`Setup Error: Missing elements:\n${missingElements.join(', ')}\n\nPage may not work correctly.`);
+        }
+        
+        try {
+            setupEventListeners();
+            console.log('✓ Event listeners set up');
+            
+            loadTheme();
+            console.log('✓ Theme loaded');
+            
+            updateStepDisplay();
+            console.log('✓ Step display updated');
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+                console.log('✓ Lucide icons initialized');
+                
+                // Verify icons rendered
+                setTimeout(() => {
+                    const iconCount = document.querySelectorAll('svg.lucide').length;
+                    if (iconCount === 0) {
+                        console.warn('⚠️ No Lucide icons found - icons may not be rendering');
+                    } else {
+                        console.log(`✓ Rendered ${iconCount} icons`);
+                    }
+                }, 100);
+            } else {
+                console.error('❌ Lucide library not loaded from CDN');
+            }
+            
+            console.log('✅ Application initialized successfully!');
+            console.log('👉 Type in the prompt textarea to test');
+            
+        } catch (error) {
+            console.error('❌ Initialization error:', error);
+            alert(`Initialization Error: ${error.message}\n\nCheck browser console for details.`);
+        }
     }
 
     function setupEventListeners() {
@@ -130,13 +216,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Prompt Input - Real-time Analysis
         let analyzeTimeout;
-        promptInput.addEventListener('input', () => {
+        promptInput.addEventListener('input', (e) => {
+            console.log('⌨️ Input detected:', e.target.value.length, 'characters');
             clearTimeout(analyzeTimeout);
             analyzeTimeout = setTimeout(() => {
                 state.originalPrompt = promptInput.value;
+                console.log('📊 Triggering analysis...');
                 analyzePrompt();
             }, 300);
         });
+        
+        // Add a test to verify event is working
+        console.log('✓ Input event listener attached to:', promptInput.id || promptInput);
 
         // Toggle Analysis Details
         if (toggleAnalysis) {
@@ -225,16 +316,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function analyzePrompt() {
         const text = state.originalPrompt;
         
+        console.log('🔍 Analyzing prompt...', {
+            length: text.length,
+            preview: text.substring(0, 50) + (text.length > 50 ? '...' : '')
+        });
+        
         if (!text || text.trim().length === 0) {
+            console.log('⚠️ Empty prompt - resetting to default state');
             state.analysis = null;
             updateAnalysisUI(PromptAnalyzer.getEmptyAnalysis());
             nextBtn.disabled = true;
             return;
         }
 
-        state.analysis = PromptAnalyzer.analyze(text, state.selectedModel);
-        updateAnalysisUI(state.analysis);
-        nextBtn.disabled = false;
+        try {
+            state.analysis = PromptAnalyzer.analyze(text, state.selectedModel);
+            console.log('✓ Analysis complete:', {
+                score: state.analysis.overallScore.score,
+                tokens: state.analysis.tokenCount,
+                components: state.analysis.components.presentCount
+            });
+            
+            updateAnalysisUI(state.analysis);
+            nextBtn.disabled = false;
+            console.log('✓ UI updated, next button enabled');
+            
+        } catch (error) {
+            console.error('❌ Analysis error:', error);
+            alert(`Analysis Error: ${error.message}\n\nCheck console for details.`);
+        }
     }
 
     function updateAnalysisUI(analysis) {
