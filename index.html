@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Optimizer V2 | Professional Prompt Engineering</title>
+    <meta name="description" content="Transform your prompts with AI-powered optimization. Based on Anthropic's latest research, supports Claude 4.5, GPT-5, and Gemini 3.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.400.0/dist/umd/lucide.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <main class="app-container">
+        <!-- Top Controls -->
+        <div class="top-controls">
+            <button id="theme-toggle" class="control-btn" title="Toggle Theme">
+                <i data-lucide="sun" id="theme-icon"></i>
+            </button>
+            <button id="library-btn" class="control-btn" title="Saved Prompts">
+                <i data-lucide="bookmark"></i>
+            </button>
+            <button id="info-btn" class="control-btn" title="Information">
+                <i data-lucide="info"></i>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <h1>Prompt Optimizer <span class="version-badge">V2</span></h1>
+            <p class="subtitle">AI-powered prompt engineering based on Anthropic's 2026 research</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-label">Input</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-label">Refine</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-label">Options</span>
+            </div>
+            <div class="progress-step" data-step="4">
+                <span class="step-number">4</span>
+                <span class="step-label">Result</span>
+            </div>
+        </div>
+
+        <!-- STEP 1: INPUT & ANALYSIS -->
+        <section id="step-1" class="step-container active">
+            <div class="step-header">
+                <h2>Your Prompt</h2>
+                <p class="step-description">Paste your existing prompt or describe what you want to accomplish</p>
+            </div>
+
+            <!-- Model Selection -->
+            <label class="input-label">Target AI Model</label>
+            <div class="model-grid">
+                <div class="model-card selected" data-model="claude">
+                    <div class="model-header">
+                        <span class="model-name">Claude 4.5</span>
+                        <span class="model-badge">Opus/Sonnet</span>
+                    </div>
+                    <span class="model-company">Anthropic</span>
+                </div>
+                <div class="model-card" data-model="gpt">
+                    <div class="model-header">
+                        <span class="model-name">GPT-5</span>
+                        <span class="model-badge">Turbo</span>
+                    </div>
+                    <span class="model-company">OpenAI</span>
+                </div>
+                <div class="model-card" data-model="gemini">
+                    <div class="model-header">
+                        <span class="model-name">Gemini 3</span>
+                        <span class="model-badge">Pro</span>
+                    </div>
+                    <span class="model-company">Google</span>
+                </div>
+            </div>
+
+            <!-- Prompt Input -->
+            <label class="input-label">
+                Your Prompt
+                <span class="token-counter">0 tokens</span>
+            </label>
+            <textarea 
+                id="initial-prompt" 
+                placeholder="Paste your prompt here, or describe what you want the AI to do. The more specific you are, the better the optimization will be.
+
+Example: 'Write a professional email to my boss requesting a raise'"></textarea>
+
+            <!-- Real-time Analysis Card -->
+            <div class="analysis-card">
+                <div class="analysis-header">
+                    <h3>Real-time Analysis</h3>
+                    <button class="toggle-details" id="toggle-analysis">
+                        <span>Show Details</span>
+                        <i data-lucide="chevron-down"></i>
+                    </button>
+                </div>
+                
+                <!-- Quick Score -->
+                <div class="score-overview">
+                    <div class="score-circle">
+                        <svg class="score-ring" viewBox="0 0 100 100">
+                            <circle class="score-ring-bg" cx="50" cy="50" r="45"></circle>
+                            <circle class="score-ring-fill" cx="50" cy="50" r="45" id="score-ring-fill"></circle>
+                        </svg>
+                        <div class="score-value" id="score-value">0</div>
+                    </div>
+                    <div class="score-info">
+                        <div class="score-label" id="score-label">Waiting for input...</div>
+                        <div class="score-message" id="score-message">Start typing to see analysis</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Metrics (collapsible) -->
+                <div class="analysis-details hidden" id="analysis-details">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-name">Token Efficiency</span>
+                                <button class="info-icon" data-tooltip="token-efficiency">
+                                    <i data-lucide="help-circle"></i>
+                                </button>
+                            </div>
+                            <div class="metric-value" id="metric-efficiency">--</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="bar-efficiency"></div>
+                            </div>
+                        </div>
+
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-name">Signal Density</span>
+                                <button class="info-icon" data-tooltip="signal-density">
+                                    <i data-lucide="help-circle"></i>
+                                </button>
+                            </div>
+                            <div class="metric-value" id="metric-signal">--</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="bar-signal"></div>
+                            </div>
+                        </div>
+
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-name">Altitude</span>
+                                <button class="info-icon" data-tooltip="altitude">
+                                    <i data-lucide="help-circle"></i>
+                                </button>
+                            </div>
+                            <div class="metric-value" id="metric-altitude">--</div>
+                            <div class="altitude-indicator" id="altitude-indicator"></div>
+                        </div>
+
+                        <div class="metric-item">
+                            <div class="metric-header">
+                                <span class="metric-name">Components</span>
+                                <button class="info-icon" data-tooltip="components">
+                                    <i data-lucide="help-circle"></i>
+                                </button>
+                            </div>
+                            <div class="metric-value" id="metric-components">--</div>
+                            <div class="component-list" id="component-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: REFINEMENT QUESTIONS -->
+        <section id="step-2" class="step-container">
+            <div class="step-header">
+                <h2>Refine Your Requirements</h2>
+                <p class="step-description">Answer these questions to improve optimization quality</p>
+            </div>
+            <div id="dynamic-questions" class="questions-grid">
+                <!-- Dynamically injected -->
+            </div>
+        </section>
+
+        <!-- STEP 3: OPTIMIZATION OPTIONS -->
+        <section id="step-3" class="step-container">
+            <div class="step-header">
+                <h2>Optimization Settings</h2>
+                <p class="step-description">Choose how you want your prompt optimized</p>
+            </div>
+
+            <!-- Optimization Level -->
+            <div class="option-group">
+                <label class="input-label">Optimization Level</label>
+                <div class="radio-group">
+                    <label class="radio-card">
+                        <input type="radio" name="opt-level" value="quick" id="opt-quick">
+                        <div class="radio-content">
+                            <div class="radio-header">
+                                <span class="radio-title">Quick Fix</span>
+                                <span class="radio-badge">~30 sec</span>
+                            </div>
+                            <p class="radio-description">Basic cleanup: remove redundancy, add missing structure</p>
+                        </div>
+                    </label>
+
+                    <label class="radio-card selected">
+                        <input type="radio" name="opt-level" value="standard" id="opt-standard" checked>
+                        <div class="radio-content">
+                            <div class="radio-header">
+                                <span class="radio-title">Standard</span>
+                                <span class="radio-badge">Recommended</span>
+                            </div>
+                            <p class="radio-description">Full optimization: framework completion, altitude correction, model-specific enhancements</p>
+                        </div>
+                    </label>
+
+                    <label class="radio-card">
+                        <input type="radio" name="opt-level" value="advanced" id="opt-advanced">
+                        <div class="radio-content">
+                            <div class="radio-header">
+                                <span class="radio-title">Advanced</span>
+                                <span class="radio-badge">Best Quality</span>
+                            </div>
+                            <p class="radio-description">Maximum optimization: examples, chain-of-thought, comprehensive restructuring</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Output Format -->
+            <div class="option-group">
+                <label class="input-label">Output Format</label>
+                <select id="output-format" class="select-input">
+                    <option value="standard">Standard (Markdown)</option>
+                    <option value="structured">Highly Structured (with sections)</option>
+                    <option value="article">Article/Prose Style</option>
+                    <option value="bullets">Concise Bullet Points</option>
+                    <option value="data">Data Format (JSON)</option>
+                </select>
+            </div>
+
+            <!-- Behavior Toggles -->
+            <div class="option-group">
+                <label class="input-label">Additional Options</label>
+                <div class="toggle-group">
+                    <label class="toggle-item">
+                        <input type="checkbox" id="opt-concise">
+                        <div class="toggle-content">
+                            <span class="toggle-title">Concise Mode</span>
+                            <span class="toggle-description">Request brief, direct responses</span>
+                        </div>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="opt-no-preamble">
+                        <div class="toggle-content">
+                            <span class="toggle-title">No Preamble</span>
+                            <span class="toggle-description">Skip introductions, go straight to output</span>
+                        </div>
+                    </label>
+                    <label class="toggle-item">
+                        <input type="checkbox" id="opt-show-thinking">
+                        <div class="toggle-content">
+                            <span class="toggle-title">Show Reasoning</span>
+                            <span class="toggle-description">Ask AI to explain its thinking</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 4: RESULTS -->
+        <section id="step-4" class="step-container">
+            <div class="step-header">
+                <h2>Optimized Prompt Ready</h2>
+                <p class="step-description">Your prompt has been professionally optimized</p>
+            </div>
+
+            <!-- Improvements Summary -->
+            <div class="improvements-card">
+                <h3>Improvements Made</h3>
+                <div class="improvements-grid">
+                    <div class="improvement-stat">
+                        <div class="stat-icon success">
+                            <i data-lucide="trending-up"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Quality Score</div>
+                            <div class="stat-value" id="improvement-score">+0</div>
+                        </div>
+                    </div>
+                    <div class="improvement-stat">
+                        <div class="stat-icon info">
+                            <i data-lucide="zap"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Token Efficiency</div>
+                            <div class="stat-value" id="improvement-efficiency">+0%</div>
+                        </div>
+                    </div>
+                    <div class="improvement-stat">
+                        <div class="stat-icon warning">
+                            <i data-lucide="dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Cost Per Call</div>
+                            <div class="stat-value" id="improvement-cost">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Techniques Applied -->
+                <div class="techniques-applied" id="techniques-applied">
+                    <h4>Techniques Applied</h4>
+                    <div class="techniques-list" id="techniques-list">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="side-by-side">
+                    <i data-lucide="columns"></i>
+                    Side-by-Side
+                </button>
+                <button class="view-btn" data-view="optimized-only">
+                    <i data-lucide="file-text"></i>
+                    Optimized Only
+                </button>
+            </div>
+
+            <!-- Side-by-Side Comparison -->
+            <div class="comparison-container" id="comparison-view">
+                <div class="comparison-pane">
+                    <div class="pane-header">
+                        <h4>Original Prompt</h4>
+                        <span class="token-badge" id="original-tokens">0 tokens</span>
+                    </div>
+                    <pre class="prompt-preview" id="original-preview"></pre>
+                </div>
+                <div class="comparison-pane">
+                    <div class="pane-header">
+                        <h4>Optimized Prompt</h4>
+                        <span class="token-badge highlight" id="optimized-tokens">0 tokens</span>
+                    </div>
+                    <pre class="prompt-preview" id="optimized-preview"></pre>
+                </div>
+            </div>
+
+            <!-- Optimized Only View -->
+            <div class="single-view hidden" id="optimized-view">
+                <div class="prompt-container">
+                    <div class="prompt-header">
+                        <h4>Your Optimized Prompt</h4>
+                        <div class="prompt-actions">
+                            <button class="icon-btn" id="copy-prompt-btn" title="Copy to Clipboard">
+                                <i data-lucide="copy"></i>
+                            </button>
+                            <button class="icon-btn" id="save-prompt-btn" title="Save to Library">
+                                <i data-lucide="bookmark-plus"></i>
+                            </button>
+                            <button class="icon-btn" id="download-prompt-btn" title="Download">
+                                <i data-lucide="download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <pre class="prompt-preview large" id="final-preview"></pre>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="result-actions">
+                <button class="btn-secondary" id="copy-optimized-btn">
+                    <i data-lucide="copy"></i>
+                    Copy Optimized Prompt
+                </button>
+                <button class="btn-primary" id="save-to-library-btn">
+                    <i data-lucide="bookmark-plus"></i>
+                    Save to Library
+                </button>
+            </div>
+
+            <!-- Copy Success Toast -->
+            <div class="toast" id="copy-toast">
+                <i data-lucide="check-circle"></i>
+                Copied to clipboard!
+            </div>
+        </section>
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <button class="btn-secondary" id="back-btn">
+                <i data-lucide="arrow-left"></i>
+                Back
+            </button>
+            <button class="btn-primary" id="next-btn" disabled>
+                Next Step
+                <i data-lucide="arrow-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Info Modal -->
+    <div class="modal" id="info-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close">
+                <i data-lucide="x"></i>
+            </button>
+            <h2>About Prompt Optimizer V2</h2>
+            <p>A professional prompt engineering tool based on Anthropic's latest research (December 2025). Transforms your prompts using context engineering principles and proven optimization techniques.</p>
+            
+            <h3>Key Features</h3>
+            <ul>
+                <li><strong>Real-time Analysis:</strong> Token counting, efficiency metrics, altitude detection</li>
+                <li><strong>Smart Optimization:</strong> Follows Anthropic's 10-component framework</li>
+                <li><strong>Model-Specific:</strong> Optimizations tailored for Claude 4.5, GPT-5, and Gemini 3</li>
+                <li><strong>Cost Savings:</strong> See exact cost reductions per API call</li>
+                <li><strong>Prompt Library:</strong> Save and reuse your best prompts</li>
+            </ul>
+
+            <h3>Research-Backed</h3>
+            <p>Built on official documentation from Anthropic, OpenAI, and Google. Uses context engineering principles to maximize prompt effectiveness while minimizing token usage.</p>
+
+            <div class="modal-links">
+                <a href="https://github.com/MaxSikorski/prompt-optimizer" target="_blank" class="link-button">
+                    <i data-lucide="github"></i>
+                    View on GitHub
+                </a>
+                <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank" class="link-button">
+                    <i data-lucide="external-link"></i>
+                    Anthropic Docs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Library Modal -->
+    <div class="modal" id="library-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content large">
+            <button class="modal-close">
+                <i data-lucide="x"></i>
+            </button>
+            <h2>Saved Prompts</h2>
+            <div class="library-header">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="library-search" placeholder="Search saved prompts...">
+                </div>
+                <button class="btn-secondary" id="clear-library-btn">
+                    <i data-lucide="trash-2"></i>
+                    Clear All
+                </button>
+            </div>
+            <div id="library-list" class="library-grid">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="library-empty" id="library-empty">
+                <i data-lucide="bookmark"></i>
+                <p>No saved prompts yet</p>
+                <p class="text-muted">Save your optimized prompts to access them later</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip Container -->
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-content" id="tooltip-content"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="analyzer.js"></script>
+    <script src="optimizer.js"></script>
+    <script src="models.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
